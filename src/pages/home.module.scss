@@ -1,0 +1,62 @@
+// TODO
+.container{
+    padding: 1rem 9rem;
+    margin: 0 auto;
+    overflow-y: auto;
+}
+
+.post{
+    width: 50rem;
+    padding: 1rem;
+    border-radius: 5px;
+
+    &:hover{
+        box-shadow: 0 0 1rem white;
+    }
+    
+    & + section{
+        margin: 2rem 0;
+    }
+
+    h1{
+        line-height: 4rem;
+    }
+    
+    h1{
+        font-weight: bold;
+        font-size: 1.9rem;
+        overflow-x:hidden;
+        width: 100%;
+        white-space: nowrap;
+        text-overflow: ellipsis; 
+    }
+
+    h6{
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: var(--gray-600);
+        line-height: 1.8rem;
+    }
+}
+
+.postInfos{
+    margin-top: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    color: var(--gray-600);
+
+    & > div{
+        display: flex;
+        gap: 0.3rem;
+        align-items: center;
+    }
+}
+
+.loadMorePosts{
+    margin-top: 2rem;
+    margin-left: 1rem;
+    background: transparent;
+    color: #fd3ae7;
+    border: 0;
+    outline: 0;
+}

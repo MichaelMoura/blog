@@ -1,0 +1,100 @@
+.banner{
+    width: 100%;
+
+    img{
+        width: 100%;
+    }
+}
+
+.container{
+    padding: 5rem 10rem;
+
+    p, li, span{
+        color:var(--gray-600)
+    }
+}
+
+.postHeader{
+    h1{
+        font-size: 3rem;
+        line-height: 4rem;
+    }
+}
+
+.postInfos{
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2rem;
+
+    & > div{
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: center;
+
+        svg{
+            color: var(--gray-600)
+        }
+    }
+}
+
+.postContent{
+    margin-top: 3rem;
+    padding: 2rem 1.5rem;
+
+    h1,h2,h3,h4,h5,h6{
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+    }
+
+    ul,ol{
+        list-style-type:circle;
+        list-style: var(--white);
+        padding-left: 1.5rem;
+    }
+
+    p,li{
+        margin: 2rem 0;
+        font-size: 1.5rem;
+        line-height: 2.3rem;
+    }
+
+    a{
+        color: var(--pink);
+        text-decoration: none;
+
+        &:hover{
+            text-decoration: underline
+        }
+    }
+}
+
+.loadWrapper{
+    height: calc(100vh - 10rem);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.loadingIcon{
+    @keyframes spin {
+        from{
+            transform: rotate(0);
+        }to{
+            transform: rotate(360deg);
+        } 
+    }
+
+    border: 3px solid var(--gray-600);
+    border-radius: 50%;
+    border-top: 2px solid var(--pink);
+    width: 1.5rem;
+    height: 1.5rem;
+    -webkit-animation: spin 1.2s linear infinite; /* Safari */
+    animation: spin 1.2s linear infinite;
+
+    
+   
+}

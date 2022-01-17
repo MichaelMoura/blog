@@ -1,0 +1,12 @@
+// TODO
+.container{
+    padding: 2rem 10rem;
+
+    img{
+        cursor: pointer;
+
+        &:hover{
+            filter: brightness(0.8);    
+        }
+    }
+}
