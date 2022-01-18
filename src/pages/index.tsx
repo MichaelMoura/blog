@@ -36,8 +36,6 @@ export default function Home({postsPagination}:HomeProps) {
   const [posts,setPosts] = useState<PostPagination>({} as PostPagination);
   const [existisNextPost,setExistisNextPost] = useState(postsPagination.next_page != null);
   
-  console.log(Object.keys(posts).length === 0);
-
   const handleLoadMorePosts = useCallback(async ()=>{    
     let response:PostPagination
     
@@ -128,8 +126,6 @@ export const getStaticProps:GetStaticProps = async () => {
      }
   )
   
-  //console.log(JSON.stringify(response,null,2));
-
   const posts = response.results.map(post=>{
     return{
       uid:post.uid,

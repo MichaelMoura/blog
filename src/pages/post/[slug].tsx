@@ -10,6 +10,7 @@ import styles from './post.module.scss';
 
 import {RichText, RichTextBlock} from "prismic-reactjs"
 import { useRouter } from 'next/router';
+import Comments from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
@@ -72,6 +73,8 @@ export default function Post({post}:PostProps) {
             <RichText render={post.data.content[0].body}/>
           </div>
         </section>
+
+        <Comments />
       </>
     )
   }
@@ -94,7 +97,7 @@ export const getStaticPaths:GetStaticPaths = async () => {
   })
 
   return {
-    paths:[...posts],
+    paths:[],
     fallback: true
   }
 };
@@ -108,14 +111,13 @@ export const getStaticProps:GetStaticProps = async ({params}) => {
 
   const response = await prismic.getByUID("posts", uid);
 
+  console.log(response)
 
   const post = {
     first_publication_date: handleDateFormat(response.first_publication_date),
     data:{
       title:response.data.title,
-      banner:{
-        url: response.data.banner.url
-      },
+      banner:response.data.banner,
       author:response.data.author,
       content:[{
           heading:response.data.content[0].heading,
