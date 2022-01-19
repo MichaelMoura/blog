@@ -32,20 +32,24 @@ interface HomeProps {
 
 
 export default function Home({postsPagination}:HomeProps) {
-
   const [posts,setPosts] = useState<PostPagination>({} as PostPagination);
   const [existisNextPost,setExistisNextPost] = useState(postsPagination.next_page != null);
   
-  const handleLoadMorePosts = useCallback(async ()=>{    
-    let response:PostPagination
-    
-    if(posts.next_page==null){
-      response = await fetch(postsPagination.next_page).then(response=>response.json());    
-    }else{
-      response = await fetch(posts.next_page).then(response=>response.json());    
-    }
-    
+  const handleLoadMorePosts = useCallback(async ()=>{   
+    let newPosts:PostPagination;
+    let response:PostPagination; 
 
+    try{
+    
+      if(posts.results==null){
+        console.log("la")
+        response = await (await fetch(postsPagination.next_page)).json()  
+      }else{
+        console.log("aqui")
+        response = await (await fetch(posts.next_page)).json()
+      }
+    
+    
     const newPost = response.results.map(post=>{
       return{
         uid:post.uid,
@@ -58,7 +62,7 @@ export default function Home({postsPagination}:HomeProps) {
       }
     })
     
-    let newPosts:PostPagination;
+    
 
     if(Object.keys(posts).length === 0){
       newPosts = {
@@ -66,17 +70,22 @@ export default function Home({postsPagination}:HomeProps) {
         results: newPost
       } 
     }else{
-      let previousPost = posts.results.map(r=>{return r});
+      let previousPost = [...posts.results];
 
       newPosts = {
         next_page: response.next_page,
         results: previousPost.concat(newPost)
       } 
     }
-
+  }catch(error){
+    alert(error.mesage)
+  }finally{
     setPosts(newPosts);
     setExistisNextPost(newPosts.next_page != null);
-  },[])
+    console.log(posts.next_page)
+
+  }
+  },[posts])
 
   return(
     <main className={styles.container}>
@@ -142,6 +151,8 @@ export const getStaticProps:GetStaticProps = async () => {
     next_page:response.next_page,
     results:posts
   }
+
+  // console.log(response)
 
   return{
     props:{
