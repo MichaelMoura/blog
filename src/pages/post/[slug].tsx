@@ -28,10 +28,11 @@ interface Post {
 }
 
 interface PostProps {
+  isPreview:boolean,
   post: Post;
 }
 
-export default function Post({post}:PostProps) {
+export default function Post({post, isPreview}:PostProps) {
   const  router = useRouter()
 
   function handleCalculateEstimetedReadingTime(post:RichTextBlock[]):number{
@@ -40,6 +41,7 @@ export default function Post({post}:PostProps) {
  
     return Math.ceil(EstimetedReadingtime);
   }
+
 
   if(router.isFallback){
       return(
@@ -52,6 +54,12 @@ export default function Post({post}:PostProps) {
 
     return(
       <>
+      {isPreview && (
+          <div className={styles.preview}>
+            <h1>Esta Tela é um Preview</h1>
+            <a href="/api/exit-preview">Sair do Preview</a>
+          </div>
+        )}
         <div className={styles.banner}>
           <img src={post.data.banner.url} alt="banner do Artigo"/>
         </div>
@@ -102,33 +110,55 @@ export const getStaticPaths:GetStaticPaths = async () => {
   }
 };
 
-export const getStaticProps:GetStaticProps = async ({params}) => {
-  const {slug} = params;
+export const getStaticProps:GetStaticProps = async ({params,preview=false,previewData}) => {
+  try{
+    //ref is a  string
+    //verificar se e nulo
+    let ref = "";
 
-  const prismic = getPrismicClient();
-
-  const uid = slug.toString()
-
-  const response = await prismic.getByUID("posts", uid);
-
-  console.log(response)
-
-  const post = {
-    first_publication_date: handleDateFormat(response.first_publication_date),
-    data:{
-      title:response.data.title,
-      banner:response.data.banner,
-      author:response.data.author,
-      content:[{
-          heading:response.data.content[0].heading,
-          body: response.data.content[0].body
-      }]
+    if(previewData != undefined){
+      const [url] = typeof previewData === "object" ? Object.values(previewData) : null;
+      ref = url
     }
+
+    const {slug} = params;
+
+    const prismic = getPrismicClient();
+
+    const uid = slug.toString();
+
+    const response = await prismic.getByUID("posts", uid, {ref:ref});
+
+    const post = {
+      first_publication_date: response.first_publication_date != null ?
+      handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
+      data:{
+        title:response.data.title,
+        banner:response.data.banner,
+        author:response.data.author,
+        content:[{
+            heading:response.data.content[0].heading,
+            body: response.data.content[0].body
+        }]
+      }
+    };
+
+    return{
+      props:{post,isPreview:preview},
+      revalidate:60*60*24
+    };
+
+  }catch(error){
+    if(error instanceof Error){
+      console.log(error.message)
+    }
+
+    return{
+      props:{},
+      revalidate:60*60*24
+    };
   }
 
-  return{
-    props:{post},
-    revalidate:60*60*24
-  }
+  
   
 };
