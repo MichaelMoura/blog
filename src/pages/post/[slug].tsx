@@ -72,7 +72,6 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
             <a href="/api/exit-preview">Sair do Preview</a>
           </div>
         )}
-        {}
         <div className={styles.banner}>
           <img src={post.data.banner.url} alt="banner do Artigo"/>
         </div>
@@ -98,13 +97,19 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
         <div className={styles.navegatePost}>
           {navegatePost.prev != null && (
             <Link href={`/post/${navegatePost.prev.slugUrl}`}>
-              <h6>{`/post/${navegatePost.prev.slugUrl}`}</h6>
+              <div>
+                <h4>{navegatePost.prev.title}</h4>
+                <p>Post Anterior</p>
+              </div>
             </Link>
           )}
           
           {navegatePost.next != null && (
             <Link href={`/post/${navegatePost.next.slugUrl}`}>
-              <h6>{navegatePost.next.title}</h6>
+              <div>
+                <h4>{navegatePost.next.title}</h4>
+                <p>Próximo Post</p>
+              </div>
             </Link>
           )}
           
@@ -115,23 +120,22 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
       </>
     )
   }
-
 }
 
 export const getStaticPaths:GetStaticPaths = async () => {
-  const prismic = getPrismicClient();
+  // const prismic = getPrismicClient();
 
-  const response = await prismic.get({
-    pageSize:1
-  })
+  // const response = await prismic.get({
+  //   pageSize:1
+  // })
 
-  const posts = response.results.map(post=>{
-    return{
-      params:{
-        slug:post.uid
-      }
-    }
-  })
+  // const posts = response.results.map(post=>{
+  //   return{
+  //     params:{
+  //       slug:post.uid
+  //     }
+  //   }
+  // })
 
   return {
     paths:[],
@@ -145,7 +149,6 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
     //verificar se e nulo
     let ref = "";
 
-    console.log(previewData)
     if(previewData != undefined){
       const [url] = typeof previewData === "object" ? Object.values(previewData) : null;
       ref = url
@@ -160,7 +163,8 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
     const response = await prismic.getByUID("posts", uid, {ref:ref});
 
     const post = {
-      first_publication_date: response.first_publication_date != null ? handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
+      first_publication_date: response.first_publication_date != null 
+      ? handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
       data:{
         title:response.data.title,
         banner:response.data.banner,
@@ -179,8 +183,6 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
           direction: "desc"
         },
       ],
-      after:response.id,
-
     });
 
     const postList = new Map<string,navegatePost>();
@@ -191,10 +193,10 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
       responseNextPosts.results.forEach(post=>{
         if(postList.get("next") == null && handleParseDate(post.first_publication_date) > currentPageDate){
           postList.set("next", {slugUrl:post.uid,title:post.data.title.toString()})
-        }
-
-        if(postList.get("prev") == null && handleParseDate(post.first_publication_date) <= currentPageDate){
-          postList.set("prev",{slugUrl:post.uid,title:post.data.title.toString()})
+        }else{
+          if(postList.get("prev") == null && handleParseDate(post.first_publication_date) < currentPageDate){
+            postList.set("prev",{slugUrl:post.uid,title:post.data.title.toString()})
+          }
         }
       })
     }
@@ -202,8 +204,8 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
     const navegatePost = {
       prev:postList.get("prev") != undefined ? postList.get("prev") : null,
       next:postList.get("next") != undefined ? postList.get("next") : null
-    }
-
+    } 
+ 
 
     return{
       props:{
