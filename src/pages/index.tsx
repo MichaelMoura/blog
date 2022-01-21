@@ -22,7 +22,8 @@ interface Post {
 }
 
 interface PostPagination {
-  next_page: string | null;
+  page:number;
+  total_pages:number;
   results: Post[];
 }
 
@@ -33,7 +34,7 @@ interface HomeProps {
 
 export default function Home({postsPagination}:HomeProps) {
   const [posts,setPosts] = useState<PostPagination>({} as PostPagination);
-  const [existisNextPost,setExistisNextPost] = useState(postsPagination.next_page != null);
+  const [existisNextPost,setExistisNextPost] = useState(postsPagination.page < postsPagination.total_pages );
   
   const handleLoadMorePosts = useCallback(async ()=>{   
     let newPosts:PostPagination;
@@ -42,11 +43,9 @@ export default function Home({postsPagination}:HomeProps) {
     try{
     
       if(posts.results==null){
-        console.log("la")
-        response = await (await fetch(postsPagination.next_page)).json()  
+        response = await (await fetch(`http://localhost:3000/api/post-pagination?page=${postsPagination.page + 1}`)).json()  
       }else{
-        console.log("aqui")
-        response = await (await fetch(posts.next_page)).json()
+        response = await (await fetch(`http://localhost:3000/api/post-pagination?page=${posts.page + 1}`)).json()  
       }
     
     
@@ -66,24 +65,25 @@ export default function Home({postsPagination}:HomeProps) {
 
     if(Object.keys(posts).length === 0){
       newPosts = {
-        next_page: response.next_page,
+        page:response.page,
+        total_pages:response.total_pages,
         results: newPost
       } 
     }else{
       let previousPost = [...posts.results];
 
       newPosts = {
-        next_page: response.next_page,
+        page:response.page,
+        total_pages:response.total_pages,
         results: previousPost.concat(newPost)
       } 
     }
+    
   }catch(error){
-    alert(error.mesage)
+    alert(error.message)
   }finally{
     setPosts(newPosts);
-    setExistisNextPost(newPosts.next_page != null);
-    console.log(posts.next_page)
-
+    setExistisNextPost(newPosts.page < newPosts.total_pages);
   }
   },[posts])
 
@@ -148,11 +148,10 @@ export const getStaticProps:GetStaticProps = async () => {
   })
 
   const postsPagination = {
-    next_page:response.next_page,
-    results:posts
+    page:response.page,
+    total_pages:response.total_pages,
+    results:posts,
   }
-
-  // console.log(response)
 
   return{
     props:{

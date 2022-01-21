@@ -11,6 +11,13 @@ import styles from './post.module.scss';
 import {RichText, RichTextBlock} from "prismic-reactjs"
 import { useRouter } from 'next/router';
 import Comments from '../../components/Comments';
+import { handleParseDate } from '../../utils/parseDate';
+import Link from 'next/link';
+
+interface navegatePost{
+  slugUrl:string;
+  title:string;
+}
 
 interface Post {
   first_publication_date: string | null;
@@ -28,11 +35,16 @@ interface Post {
 }
 
 interface PostProps {
-  isPreview:boolean,
+  isPreview:boolean;
   post: Post;
+  navegatePost:{
+    prev:navegatePost;
+    next:navegatePost;
+  }
+  
 }
 
-export default function Post({post, isPreview}:PostProps) {
+export default function Post({post, isPreview, navegatePost}:PostProps) {
   const  router = useRouter()
 
   function handleCalculateEstimetedReadingTime(post:RichTextBlock[]):number{
@@ -60,6 +72,7 @@ export default function Post({post, isPreview}:PostProps) {
             <a href="/api/exit-preview">Sair do Preview</a>
           </div>
         )}
+        {}
         <div className={styles.banner}>
           <img src={post.data.banner.url} alt="banner do Artigo"/>
         </div>
@@ -82,7 +95,23 @@ export default function Post({post, isPreview}:PostProps) {
           </div>
         </section>
 
+        <div className={styles.navegatePost}>
+          {navegatePost.prev != null && (
+            <Link href={`/post/${navegatePost.prev.slugUrl}`}>
+              <h6>{`/post/${navegatePost.prev.slugUrl}`}</h6>
+            </Link>
+          )}
+          
+          {navegatePost.next != null && (
+            <Link href={`/post/${navegatePost.next.slugUrl}`}>
+              <h6>{navegatePost.next.title}</h6>
+            </Link>
+          )}
+          
+        </div>
+
         <Comments />
+
       </>
     )
   }
@@ -143,14 +172,51 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
       }
     };
 
+    const responseNextPosts = await prismic.get({
+      orderings:[
+        {
+          field:"document.first_publication_date",
+          direction: "desc"
+        },
+      ],
+      after:response.id,
+
+    });
+
+    const postList = new Map<string,navegatePost>();
+
+    if(responseNextPosts != null){
+      const currentPageDate = handleParseDate(response.first_publication_date);
+      
+      responseNextPosts.results.forEach(post=>{
+        if(postList.get("next") == null && handleParseDate(post.first_publication_date) > currentPageDate){
+          postList.set("next", {slugUrl:post.slugs.toString(),title:post.data.title.toString()})
+        }
+
+        if(postList.get("prev") == null && handleParseDate(post.first_publication_date) <= currentPageDate){
+          postList.set("prev",{slugUrl:post.slugs.toString(),title:post.data.title.toString()})
+        }
+      })
+    }
+
+    const navegatePost = {
+      prev:postList.get("prev") != undefined ? postList.get("prev") : null,
+      next:postList.get("next") != undefined ? postList.get("next") : null
+    }
+
+
     return{
-      props:{post,isPreview:preview},
+      props:{
+        post,
+        isPreview:preview,
+        navegatePost
+      },
       revalidate:60*60*24
     };
 
   }catch(error){
     if(error instanceof Error){
-      console.log(error.message)
+      console.log(error)
     }
 
     return{
