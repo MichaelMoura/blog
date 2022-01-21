@@ -145,6 +145,7 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
     //verificar se e nulo
     let ref = "";
 
+    console.log(previewData)
     if(previewData != undefined){
       const [url] = typeof previewData === "object" ? Object.values(previewData) : null;
       ref = url
@@ -159,8 +160,7 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
     const response = await prismic.getByUID("posts", uid, {ref:ref});
 
     const post = {
-      first_publication_date: response.first_publication_date != null ?
-      handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
+      first_publication_date: response.first_publication_date != null ? handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
       data:{
         title:response.data.title,
         banner:response.data.banner,
@@ -190,11 +190,11 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
       
       responseNextPosts.results.forEach(post=>{
         if(postList.get("next") == null && handleParseDate(post.first_publication_date) > currentPageDate){
-          postList.set("next", {slugUrl:post.slugs.toString(),title:post.data.title.toString()})
+          postList.set("next", {slugUrl:post.uid,title:post.data.title.toString()})
         }
 
         if(postList.get("prev") == null && handleParseDate(post.first_publication_date) <= currentPageDate){
-          postList.set("prev",{slugUrl:post.slugs.toString(),title:post.data.title.toString()})
+          postList.set("prev",{slugUrl:post.uid,title:post.data.title.toString()})
         }
       })
     }
@@ -216,7 +216,7 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
 
   }catch(error){
     if(error instanceof Error){
-      console.log(error)
+      console.log(error.message)
     }
 
     return{
