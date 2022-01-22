@@ -1,7 +1,7 @@
 
 export default function Comments(){
     return(
-    <section
+    <section 
       style={{ width: '100%' }}
       ref={
         element => {

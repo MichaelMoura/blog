@@ -40,6 +40,10 @@
     }
 }
 
+.postUpdate{
+    margin-top: 1.5rem;
+}
+
 .preview{
     padding:5rem 10rem;
     text-align: center;
@@ -123,6 +127,39 @@
     animation: spin 1.2s linear infinite;
 }
 
-.comments{
-    width: 100%;
+.navegatePost{
+    padding: 0 12rem;
+    display: flex;
+    line-height: 3rem;
+    margin-bottom: 2rem;
+    justify-content: space-between;
+    
+    div{
+        width: 26rem;
+        cursor: pointer;
+
+        h4{        
+            overflow-x:hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            font-size: 1.5rem;
+        }
+
+        p{
+            font-size: 1.1rem;
+            color: var(--pink);
+        }
+
+        &:last-of-type > div{
+            text-align: right;
+        }
+    }
+    
+
+    
+
+    
 }
+
+

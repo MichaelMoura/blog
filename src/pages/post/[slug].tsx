@@ -21,6 +21,10 @@ interface navegatePost{
 
 interface Post {
   first_publication_date: string | null;
+  last_publication:{
+    date:string,
+    hour:string
+  }
   data: {
     title: string;
     banner: {
@@ -45,6 +49,7 @@ interface PostProps {
 }
 
 export default function Post({post, isPreview, navegatePost}:PostProps) {
+  console.log(post)
   const  router = useRouter()
 
   function handleCalculateEstimetedReadingTime(post:RichTextBlock[]):number{
@@ -87,6 +92,11 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
                   </span>
                 </div>
             </div>
+            {post.last_publication.date.length != 0 && (
+              <div className={styles.postUpdate}>
+                <span>* editado em {post.last_publication.date}, às {post.last_publication.hour}</span>
+              </div>
+            )}
           </div>
           <div className={styles.postContent}>
             <h3>{post.data.content[0].heading}</h3>
@@ -94,7 +104,8 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
           </div>
         </section>
 
-        <div className={styles.navegatePost}>
+        <section className={styles.navegatePost}>
+          <div>
           {navegatePost.prev != null && (
             <Link href={`/post/${navegatePost.prev.slugUrl}`}>
               <div>
@@ -103,7 +114,10 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
               </div>
             </Link>
           )}
+          </div>
+
           
+          <div>
           {navegatePost.next != null && (
             <Link href={`/post/${navegatePost.next.slugUrl}`}>
               <div>
@@ -112,8 +126,8 @@ export default function Post({post, isPreview, navegatePost}:PostProps) {
               </div>
             </Link>
           )}
-          
-        </div>
+          </div>
+        </section>
 
         <Comments />
 
@@ -162,9 +176,17 @@ export const getStaticProps:GetStaticProps = async ({params,preview=false,previe
 
     const response = await prismic.getByUID("posts", uid, {ref:ref});
 
+    console.log(response)
+
     const post = {
-      first_publication_date: response.first_publication_date != null 
+      first_publication_date: response.first_publication_date != null
       ? handleDateFormat(response.first_publication_date) : handleDateFormat(new Date),
+      last_publication:{
+        date:response.last_publication_date === response.first_publication_date
+        ? handleDateFormat(response.last_publication_date) : "",
+        hour: response.last_publication_date === response.first_publication_date ? 
+        response.last_publication_date.slice(11,16) : ""
+      },
       data:{
         title:response.data.title,
         banner:response.data.banner,
